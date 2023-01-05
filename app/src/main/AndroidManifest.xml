@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.lch.test">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Test">
+        <activity android:name=".activity.LightSensorActivity"></activity>
+        <activity android:name=".activity.DatabaseActivity" />
+        <activity android:name=".activity.ContentResolverActivity" />
+        <activity android:name=".activity.BroadcastActivity" />
+
+        <service android:name=".service.MyService" />
+        <service android:name=".service.MyIntentService" />
+        <service android:name=".service.LongRunningService" />
+
+        <receiver android:name=".broadcast.AlarmReceiver" />
+        <receiver android:name=".broadcast.BootCompleteReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".broadcast.MyBroadcastReceiver">
+            <intent-filter android:priority="100">
+                <action android:name="com.example.broadcasttest.MY_BROADCAST" />
+            </intent-filter>
+        </receiver>
+
+        <provider
+            android:name=".contentProvider.DatabaseProvider"
+            android:authorities="com.example.databasetest.provider"
+            android:exported="true"></provider>
+
+        <activity android:name=".activity.MyServiceActivity" />
+        <activity android:name=".activity.CustomViewActivity" />
+        <activity android:name=".activity.HookActivity" />
+        <activity android:name=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
