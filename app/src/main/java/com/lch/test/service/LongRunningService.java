@@ -6,24 +6,39 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 
 import com.lch.test.broadcast.AlarmReceiver;
 
 import java.util.Date;
 
-public class LongRunningService  extends Service {
+public class LongRunningService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("lch", "intent:" + intent.getExtras().getString("lch"));
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.d("lch", "LongRunningService executed at " + new Date().
-                        toString());
+                long last = System.currentTimeMillis();
+                while (true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Log.d("lch", "LongRunningService executed at " + new Date());
+//                    long now = System.currentTimeMillis();
+//                    if ((now-last)/1000.0==0){
+//                        Log.d("lch", "LongRunningService executed at " + new Date().
+//                                toString());
+//                    }
+                }
             }
         }).start();
         AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);

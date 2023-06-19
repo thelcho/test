@@ -20,6 +20,10 @@ import com.lch.test.activity.DatabaseActivity;
 import com.lch.test.activity.HookActivity;
 import com.lch.test.activity.LightSensorActivity;
 import com.lch.test.activity.MyServiceActivity;
+import com.lch.test.designModel.observer.Emitter;
+import com.lch.test.designModel.observer.Observable;
+import com.lch.test.designModel.observer.ObservableOnSubscribe;
+import com.lch.test.designModel.observer.Observer;
 
 import org.w3c.dom.NodeList;
 
@@ -27,30 +31,32 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
-    TextView textView,tv_hook,tv_custom_view,tv_service,tv_broadcast,
-            tv_content_resolver,tv_database,tv_light_sensor;
+    TextView textView, tv_hook, tv_custom_view, tv_service, tv_broadcast,
+            tv_content_resolver, tv_database, tv_light_sensor;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textView=findViewById(R.id.textView);
-        tv_hook=findViewById(R.id.textView2);
-        tv_custom_view=findViewById(R.id.tv_custom_view);
-        tv_service=findViewById(R.id.tv_service);
-        tv_broadcast=findViewById(R.id.tv_broadcast);
-        tv_content_resolver=findViewById(R.id.tv_content_resolver);
-        tv_database=findViewById(R.id.tv_database);
-        tv_light_sensor=findViewById(R.id.tv_light_sensor);
+        textView = findViewById(R.id.textView);
+        tv_hook = findViewById(R.id.textView2);
+        tv_custom_view = findViewById(R.id.tv_custom_view);
+        tv_service = findViewById(R.id.tv_service);
+        tv_broadcast = findViewById(R.id.tv_broadcast);
+        tv_content_resolver = findViewById(R.id.tv_content_resolver);
+        tv_database = findViewById(R.id.tv_database);
+        tv_light_sensor = findViewById(R.id.tv_light_sensor);
 
         textView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("lch","onClick");
-                Integer a =2;
+                Log.d("lch", "onClick");
+                Integer a = 2;
                 String b = "jd";
                 b.equals(a);
                 NodeList c;
@@ -99,19 +105,66 @@ public class MainActivity extends AppCompatActivity {
         tv_light_sensor.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(MainActivity.this, LightSensorActivity.class);
-                startActivity(intent);
+                Observable observable = Observable.create(new ObservableOnSubscribe<String>() {
+                    @Override
+                    public void subscribe(Emitter<String> emitter) {
+                        emitter.onNext("hello");
+                        Log.d("lch", "发送：hello");
+                    }
+                });
+
+                observable.subscribeObserver(new Observer<String>() {
+                    @Override
+                    public void onNext(String s) {
+                        Log.d("lch", "收到：" + s);
+                    }
+
+                    @Override
+                    public void onSubscribe() {
+                        Log.d("lch", "onSubscribe");
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Log.d("lch", "onError");
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.d("lch", "onComplete");
+                    }
+                });
+//                Intent intent = new Intent(MainActivity.this, LightSensorActivity.class);
+//                startActivity(intent);
             }
         });
 
-        hook(MainActivity.this,textView);
+        hook(MainActivity.this, textView);
         textView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                Log.d("lch","onTouch："+event.getAction());
+                Log.d("lch", "onTouch：" + event.getAction());
                 return false;
             }
         });
+
+        //保活测试
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long last = System.currentTimeMillis();
+                while (true) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Log.d("lch", "MainActivity new Thread" + new Date());
+                }
+            }
+        }).start();
+
+
     }
 
 //    public void onWindowFocusChanged(boolean hasFocus) {
@@ -152,7 +205,7 @@ public class MainActivity extends AppCompatActivity {
                     return method.invoke(onClickListenerInstance, args);
                     //执行被代理的对象的逻辑
 
-                    }
+                }
             });
             // 3. 用我们自己的点击事件代理类，设置到"持有者"中
             field.set(mListenerInfo, proxyOnClickListener);
@@ -160,12 +213,15 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
     // 自定义代理类
     static class ProxyOnClickListener implements View.OnClickListener {
         View.OnClickListener oriLis;
+
         public ProxyOnClickListener(View.OnClickListener oriLis) {
             this.oriLis = oriLis;
         }
+
         @Override
         public void onClick(View v) {
             Log.d("HookSetOnClickListener", "点击事件被 hook 到了");

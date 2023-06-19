@@ -70,6 +70,7 @@ public class MyServiceActivity extends AppCompatActivity implements View.OnClick
 
 
         Intent intent = new Intent(this, LongRunningService.class);
+        intent.putExtra("lch","lchoo");
         startService(intent);
     }
 
